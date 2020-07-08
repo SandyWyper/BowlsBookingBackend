@@ -23,10 +23,10 @@ service: bowlsbookingbackend
 provider:
   name: aws
   runtime: nodejs12.x
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+  memorySize: 128 # set the maximum memory of the Lambdas in Megabytes
+  timeout: 10 # the timeout is 10 seconds (default is 6 seconds)
+  stage: dev # setting the env stage to dev, this will be visible in the routes
+  region: eu-west-1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -57,9 +57,43 @@ provider:
 #    - exclude-me.js
 #    - exclude-me-dir/**
 
-functions:
-  hello:
-    handler: handler.hello
+functions: # add 4 functions for CRUD
+  createUser:
+    handler: handler.createUser # point to exported create function in handler.js
+    events:
+      - http:
+          path: users # path will be domain.name.com/dev/users
+          method: post
+          cors: true
+  getUser:
+    handler: handler.getUser
+    events:
+      - http:
+          path: users/{id} # path will be domain.name.com/dev/users/{user_id}
+          method: get
+          cors: true
+  getAllUsers:
+    handler: handler.getAllUsers # path will be domain.name.com/dev/users
+    events:
+      - http:
+          path: users
+          method: get
+          cors: true
+  updateUser:
+    handler: handler.updateUser # path will be domain.name.com/dev/users/{user_id}
+    events:
+      - http:
+          path: users/{id}
+          method: put
+          cors: true
+  deleteUser:
+    handler: handler.deleteUser
+    events:
+      - http:
+          path: users/{id} # path will be domain.name.com/dev/users/{user_id}
+          method: delete
+          cors: true
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -111,3 +145,6 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+
+plugins:
+  - serverless-offline # adding the plugin to be able to run the offline emulation
