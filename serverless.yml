@@ -87,11 +87,46 @@ functions: # add 4 functions for CRUD
           method: put
           cors: true
   deleteUser:
-    handler: handler.deleteUser
+    handler: handler.deleteUser # path will be domain.name.com/dev/users/{user_id}
     events:
       - http:
-          path: users/{id} # path will be domain.name.com/dev/users/{user_id}
+          path: users/{id}
           method: delete
+          cors: true
+  createSlot:
+    handler: handler.createSlot # path will be domain.name.com/dev/slot
+    events:
+      - http:
+          path: slot
+          method: post
+          cors: true
+  getAllSlots:
+    handler: handler.getAllSlots # path will be domain.name.com/dev/slot
+    events:
+      - http:
+          path: slot
+          method: get
+          cors: true
+  deleteSlot:
+    handler: handler.deleteSlot # path will be domain.name.com/dev/slot
+    events:
+      - http:
+          path: slot/{id}
+          method: delete
+          cors: true
+  addBooking:
+    handler: handler.addBooking
+    events:
+      - http:
+          path: slot/add/booking/{id} # path will be domain.name.com/dev/slot/add/booking
+          method: post
+          cors: true
+  removeBooking:
+    handler: handler.removeBooking
+    events:
+      - http:
+          path: slot/remove/booking/{id} # path will be domain.name.com/dev/slot/remove/booking
+          method: post
           cors: true
 
 #    The following are a few example events you can configure

@@ -4,10 +4,12 @@ require('dotenv').config({ path: './variables.env' });
 
 const connectToDatabase = require('./lib/db');
 const User = require('./models/User');
+const Slot = require('./models/Slot');
 
 module.exports.createUser = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
+  //needs some validation - checking for duplicate accounts and password encryption
   connectToDatabase().then(() => {
     User.create(JSON.parse(event.body))
       .then((user) =>
@@ -105,6 +107,145 @@ module.exports.deleteUser = (event, context, callback) => {
           statusCode: err.statusCode || 500,
           headers: { 'Content-Type': 'text/plain' },
           body: 'Could not find user to delete.',
+        })
+      );
+  });
+};
+
+//    ----------- Booking slots
+
+module.exports.createSlot = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  //needs some validation - Checking for Admin privileges and neccesary fields are filled
+  connectToDatabase().then(() => {
+    Slot.create(JSON.parse(event.body))
+      .then((slot) =>
+        callback(null, {
+          statusCode: 200,
+          body: JSON.stringify(slot),
+        })
+      )
+      .catch((err) =>
+        callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not create the booking slot.',
+        })
+      );
+  });
+};
+
+module.exports.getAllSlots = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase().then(() => {
+    Slot.find()
+      .then((slots) =>
+        callback(null, {
+          statusCode: 200,
+          body: JSON.stringify(slots),
+        })
+      )
+      .catch((err) =>
+        callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not fetch the booking slots.',
+        })
+      );
+  });
+};
+
+module.exports.deleteSlot = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase().then(() => {
+    Slot.findByIdAndRemove(event.pathParameters.id)
+      .then((slot) =>
+        callback(null, {
+          statusCode: 200,
+          body: JSON.stringify({ message: 'Removed slot with id: ' + slot._id }),
+        })
+      )
+      .catch((err) =>
+        callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not find slot to delete.',
+        })
+      );
+  });
+};
+
+module.exports.addBooking = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase().then(() => {
+    // console.log(event);
+    Slot.findById(event.pathParameters.id)
+      .then((slot) => {
+        const booking = JSON.parse(event.body);
+
+        slot.booking = { userID: booking.userID, bookingNames: booking.bookingNames };
+        // callback(null, {
+        //   statusCode: 200,
+        //   body: JSON.stringify({ message: 'added booking ' }),
+        // });
+        slot
+          .save()
+          .then((slot) =>
+            callback(null, {
+              statusCode: 200,
+              body: JSON.stringify({ message: 'Added booking to slot with id: ' + slot._id, booking: slot.booking }),
+            })
+          )
+          .catch((err) =>
+            callback(null, {
+              statusCode: err.statusCode || 500,
+              headers: { 'Content-Type': 'text/plain' },
+              body: 'Could not add booking. Error: ' + err,
+            })
+          );
+      })
+      .catch((err) =>
+        callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not find slot to add booking to.' + err,
+        })
+      );
+  });
+};
+
+module.exports.removeBooking = (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+
+  connectToDatabase().then(() => {
+    Slot.findById(event.pathParameters.id)
+      .then((slot) => {
+        slot.booking.remove();
+        slot
+          .save()
+          .then((slot) =>
+            callback(null, {
+              statusCode: 200,
+              body: JSON.stringify({ message: 'Removed booking to slot with id: ' + slot._id }),
+            })
+          )
+          .catch((err) =>
+            callback(null, {
+              statusCode: err.statusCode || 500,
+              headers: { 'Content-Type': 'text/plain' },
+              body: 'Could not remove booking.' + err,
+            })
+          );
+      })
+      .catch((err) =>
+        callback(null, {
+          statusCode: err.statusCode || 500,
+          headers: { 'Content-Type': 'text/plain' },
+          body: 'Could not find slot to remove booking from.',
         })
       );
   });
