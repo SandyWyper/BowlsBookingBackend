@@ -6,6 +6,11 @@ const connectToDatabase = require('./lib/db');
 const User = require('./models/User');
 const Slot = require('./models/Slot');
 
+const crossHeader = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Credentials': true,
+};
+
 module.exports.createUser = (event, context, callback) => {
   context.callbackWaitsForEmptyEventLoop = false;
 
@@ -15,6 +20,7 @@ module.exports.createUser = (event, context, callback) => {
       .then((user) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify(user),
         })
       )
@@ -36,6 +42,7 @@ module.exports.getUser = (event, context, callback) => {
       .then((user) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify(user),
         })
       )
@@ -57,6 +64,7 @@ module.exports.getAllUsers = (event, context, callback) => {
       .then((users) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify(users),
         })
       )
@@ -78,6 +86,7 @@ module.exports.updateUser = (event, context, callback) => {
       .then((user) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify(user),
         })
       )
@@ -99,6 +108,7 @@ module.exports.deleteUser = (event, context, callback) => {
       .then((user) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify({ message: 'Removed user with id: ' + user._id, user: user.name }),
         })
       )
@@ -123,6 +133,7 @@ module.exports.createSlot = (event, context, callback) => {
       .then((slot) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify(slot),
         })
       )
@@ -144,6 +155,7 @@ module.exports.getAllSlots = (event, context, callback) => {
       .then((slots) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify(slots),
         })
       )
@@ -165,6 +177,7 @@ module.exports.deleteSlot = (event, context, callback) => {
       .then((slot) =>
         callback(null, {
           statusCode: 200,
+          headers: crossHeader,
           body: JSON.stringify({ message: 'Removed slot with id: ' + slot._id }),
         })
       )
@@ -186,17 +199,13 @@ module.exports.addBooking = (event, context, callback) => {
     Slot.findById(event.pathParameters.id)
       .then((slot) => {
         const booking = JSON.parse(event.body);
-
         slot.booking = { userID: booking.userID, bookingNames: booking.bookingNames };
-        // callback(null, {
-        //   statusCode: 200,
-        //   body: JSON.stringify({ message: 'added booking ' }),
-        // });
         slot
           .save()
           .then((slot) =>
             callback(null, {
               statusCode: 200,
+              headers: crossHeader,
               body: JSON.stringify({ message: 'Added booking to slot with id: ' + slot._id, booking: slot.booking }),
             })
           )
@@ -230,6 +239,7 @@ module.exports.removeBooking = (event, context, callback) => {
           .then((slot) =>
             callback(null, {
               statusCode: 200,
+              headers: crossHeader,
               body: JSON.stringify({ message: 'Removed booking to slot with id: ' + slot._id }),
             })
           )

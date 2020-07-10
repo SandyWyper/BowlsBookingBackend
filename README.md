@@ -57,7 +57,7 @@ Perhaps when prompted to enter the _bookingNames_ the user is provided with auto
 Imports `db.js` - this is important for AWS Lambda so that it recognises if a database connection is already established.
 Here I've set out each action, which include MongDB queries/communications. Each of these is split into it's own Lambda function (i think...) and hooked up to the necessary API Gateway endpoints by Serverless. **Password encryptions and JTW validation to be added later.**
 
-##### serverless.yml
+#### serverless.yml
 
 Here is where I've set out all the config info that Serverless requires to do it's magic.
 
